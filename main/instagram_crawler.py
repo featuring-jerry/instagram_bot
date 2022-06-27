@@ -6,36 +6,59 @@ import instagram_crawling
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 import random
-import time
 import re
 import json
 import pandas as pd
-from datetime import datetime
 
 
-class DatetimeDecorator:
+import time
+import os
+import sys
+from dateutil.tz import gettz
 
-    def __init__(self,function) -> None:
-        self.function = function
-
-    def __call__(self, *args, **kwargs):
-        print(datetime.now())
-        result = self.function(*args, **kwargs)
-        print(datetime.now())
-        return result
+from datetime import datetime, date, timezone, timedelta
+from functools import partial, update_wrapper, WRAPPER_ASSIGNMENTS, WRAPPER_UPDATES
 
 
 class InstagramBot:
 
-    def __init__(self, user_id, user_pw) -> None:      
+    # 생성자 - 로그파일 생성
+    def __init__(self, user_id, user_pw) -> None:
+
+        # today = str(date.today())
+        KST = timezone(timedelta(hours=9))
+        time_record = datetime.now(KST)
+        today = str(time_record)[:10]
+
+        if not(os.path.isdir(today)):
+            os.mkdir(os.path.join(today))
+
+        sys.stdout = open('{today}/stdout.txt'.format(today=today), 'a')
+
         self.user_id = user_id
         self.user_pw = user_pw
         self.browser = wd.Chrome(ChromeDriverManager().install())     
         self.instagram_url = "https://www.instagram.com/"
 
-    # 페이스북 아이디로 로그인하기
-    @DatetimeDecorator
+    # 소멸자 - 소멸시에 로그파일을 닫아준다.
+    def __del__(self):
+        sys.stdout.close()
+
+
+    def timer(func):
+    # decorator function
+        def wrapper(*args, **kwargs):
+            print(str(datetime.now(timezone(timedelta(hours=9))).time())[:8], func, "함수 시작")
+            ret = func(*args, **kwargs)
+            print(str(datetime.now(timezone(timedelta(hours=9))).time())[:8], func, "함수 끝")
+            return ret
+        wrapped = partial(update_wrapper, wrapped=func, assigned=WRAPPER_ASSIGNMENTS, updated=WRAPPER_UPDATES)
+        return wrapped(wrapper)
+
+
+    @timer
     def logIn(self):
+    # 페이스북 아이디로 로그인하기
         self.browser.implicitly_wait(2)
         self.browser.get(self.instagram_url)
 
@@ -86,9 +109,9 @@ class InstagramBot:
         return
 
 
-    # 로그인 시 나타나는 설정-나중에하기 popup창 처리
-    @DatetimeDecorator    
+    @timer
     def setPermisson(self):
+    # 로그인 시 나타나는 설정-나중에하기 popup창 처리
         try:
             # notnow = ui.WebDriverWait(self.browser, random.random() + 5).until(EC.element_located_to_be_selected(By.XPATH,"//button[contains(text(), '나중에 하기')]"))
             notnow = self.browser.find_element_by_xpath('/html/body/div[1]/div/div[1]/div/div[2]/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div/div[3]/button[2]')
@@ -102,9 +125,9 @@ class InstagramBot:
         return
 
 
-    # 검색창에 특정 채널 id 검색해서 해당 채널로 이동
-    @DatetimeDecorator
+    @timer
     def search(self, channel_id):
+    # 검색창에 특정 채널 id 검색해서 해당 채널로 이동
         try:
             # search_input_form = self.browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/nav/div[2]/div/div/div[2]/input")
             search_input_form = self.browser.find_element_by_xpath("//input[contains(@placeholder, '검색')]")
@@ -127,9 +150,9 @@ class InstagramBot:
         return
     
 
-    # 해당 게시물로 이동 - 없는 url이면 에러없이 홈화면으로 가지기 때문에 만듦
-    @DatetimeDecorator
+    @timer
     def enterPost(self, target_post_url): # url로 받는게 나을 것 같음
+    # 해당 게시물로 이동 - 없는 url이면 에러없이 홈화면으로 가지기 때문에 만듦
         # target_post_url = self.instagram_url + "/p/" + post_id + "/"
 
         self.browser.get(target_post_url)
@@ -145,9 +168,9 @@ class InstagramBot:
 
     # clickLikeBtn(), comment() - 게시글 안에 들어와 있을 때
 
-    # (해당포스트에 들어와있을 때 사용가능) 따봉버튼 누르기
-    @DatetimeDecorator
+    @timer
     def clickLikeBtn(self):
+    # (해당포스트에 들어와있을 때 사용가능) 따봉버튼 누르기
         try:
             like_btn = ui.WebDriverWait(self.browser, random.random() + 2).until(EC.element_to_be_clickable("//span[@class='_aamw']/button"))
             like_btn.click()
@@ -161,9 +184,9 @@ class InstagramBot:
         return
     
 
-    # (해당포스트에 들어와있을 때 사용가능) 댓글달기
-    @DatetimeDecorator
+    @timer
     def comment(self, content):
+    # (해당포스트에 들어와있을 때 사용가능) 댓글달기
         try:
             activate_comment_btn = ui.WebDriverWait(self.browser, random.random() + 3).until(EC.element_to_be_clickable("//span[@class='_aamx']/button"))
             activate_comment_btn.click()
@@ -193,12 +216,12 @@ class InstagramBot:
 
 
 
-    # 메인에서 특정채널 검색해서 들어간다음에 메시지보내기 버튼 클릭
-    @DatetimeDecorator
+    @timer
     def activateSpecificChannelDM(self, channel_id):
+    # 메인에서 특정채널 검색해서 들어간다음에 메시지보내기 버튼 클릭
         
         # 1. 특정채널 검색해서 들어가기
-        self.search(self, channel_id)
+        self.search(channel_id)
 
         # 2. 메시지 보내기 버튼 클릭
         check_if_succes = False
@@ -217,7 +240,7 @@ class InstagramBot:
 
 
     # (DM창 안에 있을 때 사용가능) DM 보내기  cf) 조합된 function - DM(self, ...) 을 사용하세요!
-    @DatetimeDecorator
+    @timer
     def sendDM(self, message):
         try:
             textarea_element = ui.WebDriverWait(self.browser, 2).until(EC.element_to_be_clickable((By.XPATH, "//textarea[contains(@placeholder,'메시지 입력...')]")))
@@ -238,36 +261,38 @@ class InstagramBot:
 
     ############################### 조합된 function ##################################
 
-    """ # DM(channel_id, message)
-        # input값 2가지:
-        # (1) channel_id - DM보낼 채널명
-        # (2) message - 전달할 DM 메시지 내용
-        # ex) instabot("official_jerry_superman", "제리님 팬이에요~!")
-
-        # 함수 시작: 메인에서 시작
-        # 함수 기능: 메인에서 채널 검색 후, 채널에서 메시지보내기 누르고, DM 화면들어가서 DM 보내기
-    """
-    @DatetimeDecorator
+    @timer
     def DM(self, channel_id, message):
-        is_valid_channel = self.activateSpecificChannelDM(self, channel_id)
+        """ # DM(channel_id, message)
+            # input값 2가지:
+            # (1) channel_id - DM보낼 채널명
+            # (2) message - 전달할 DM 메시지 내용
+            # ex) instabot("official_jerry_superman", "제리님 팬이에요~!")
+
+            # 함수 시작: 메인에서 시작
+            # 함수 기능: 메인에서 채널 검색 후, 채널에서 메시지보내기 누르고, DM 화면들어가서 DM 보내기
+        """
+        print("{channel_id} 채널에 '{message}' 메세지 보내기를 시작합니다!".format(channel_id=channel_id, message=message))
+        is_valid_channel = self.activateSpecificChannelDM(channel_id)
 
         if is_valid_channel:
-            self.sendDM(self, message)
+            self.sendDM(message)
 
         return
 
-    """# likesWithComment(target_url, content)
-    # input값 2가지:
-    # (1) target_url - 해당 포스트의 full url
-    # (2) content - 댓글내용
-    # ex) likesWithComment("https://www.instagram.com/p/Ccb0N72pHb7/", "우와 된장술밥 정말 맛있겠네요! 오늘 한번 도전해봐야겠어요!")
 
-    # 함수 시작: anywhere
-    # 함수 기능: target_url에 해당하는 포스트에 따봉과 댓글을 남긴다.
-    """
-    @DatetimeDecorator
+    @timer
     def likesWithComment(self, target_url, content):
-        self.enterPost(self, target_url)
-        self.clickLikeBtn(self)
-        self.comment(self, content)
+        """# likesWithComment(target_url, content)
+        # input값 2가지:
+        # (1) target_url - 해당 포스트의 full url
+        # (2) content - 댓글내용
+        # ex) likesWithComment("https://www.instagram.com/p/Ccb0N72pHb7/", "우와 된장술밥 정말 맛있겠네요! 오늘 한번 도전해봐야겠어요!")
+
+        # 함수 시작: anywhere
+        # 함수 기능: target_url에 해당하는 포스트에 따봉과 댓글을 남긴다.
+        """
+        self.enterPost(target_url)
+        self.clickLikeBtn()
+        self.comment(content)
         return

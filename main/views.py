@@ -45,21 +45,21 @@ channel_id = 'cob_202103'
 def index(request):
 
     insta_bot1 = InstagramBot(my_settings.user_id, my_settings.user_passwd)
-    insta_bot1.logIn(insta_bot1)
-    insta_bot1.setPermisson(insta_bot1)
+    insta_bot1.logIn()
+    insta_bot1.setPermisson()
 
     # insta_bot1.search("cob_202103")
 
     #### DM 보내기 ####
-    insta_bot1.DM(insta_bot1, "super_moon_1999", "문스 알아냈어요")
+    insta_bot1.DM("super_moon_1999", "Hey Moons, this is Jerry's msg by Instagram_bot dev_1 version!")
     time.sleep(999)
 
     # 1. 
-    is_valid_channel = insta_bot1.activateSpecificChannelDM(insta_bot1, "super_moon_1999")
+    is_valid_channel = insta_bot1.activateSpecificChannelDM("super_moon_1999")
 
 
     if is_valid_channel:
-        insta_bot1.sendDM(insta_bot1, "Hey Moons, this is Jerry's msg by Instagram_bot dev_1 version!")
+        insta_bot1.sendDM("Hey Moons, this is Jerry's msg by Instagram_bot dev_1 version!")
     
     time.sleep(999)
 
@@ -67,14 +67,14 @@ def index(request):
     ## 좋아요 댓글 남기기
     # 1. 특정 포스트로 이동
     post_url = "https://www.instagram.com/p/Ccb0N72pHb7/"
-    insta_bot1.enterPost(insta_bot1, post_url)
+    insta_bot1.enterPost(post_url)
 
     # 2. 좋아요 버튼
-    insta_bot1.clickLikeBtn(insta_bot1)
+    insta_bot1.clickLikeBtn()
 
     # 3. 댓글 남기기
     content = "우와 된장술밥 정말 맛있겠네요! 오늘 한번 도전해봐야겠어요!"
-    insta_bot1.comment(insta_bot1, content)
+    insta_bot1.comment(content)
 
 
 
