@@ -18,6 +18,8 @@ import re
 import json
 import pandas as pd
 
+import multiprocessing
+
 facebook_login_page_css = ".sqdOP.yWX7d.y3zKF     "
 facebook_login_page_css2 = ".sqdOP.L3NKy.y3zKF     "
 facebook_id_form_id = "email"
@@ -40,59 +42,44 @@ specific_channel = "https://www.instagram.com/cob_202103/"
 
 # Moons
 # channel_id = 'super_moon_1999'
-channel_id = 'cob_202103'
+# channel_id = 'cob_202103'
+
 
 def index(request):
+    # channel_list = ['super_moon_1999', 'cob_202103', 'wookdw']
+    # pool = multiprocessing.Pool(processes=3)
+    # pool.map()
+
+    # for i in range(3):
+    #     thread = InstagramBot(my_settings.user_id, my_settings.user_passwd, name="insta_bot {}".format(i))
+    #     thread.start()
+    #     thread.logIn()
+    #     thread.setPermisson()
+    #     thread.DM("super_moon_1999", "THREADING ADOPTED: This is Jerry's msg for testing Insagram_bot dev version2")
+    # time.sleep(99999)
 
     insta_bot1 = InstagramBot(my_settings.user_id, my_settings.user_passwd)
-    insta_bot1.logIn()
-    insta_bot1.setPermisson()
+    insta_bot1.log_in()
+    insta_bot1.set_permisson()
 
     # insta_bot1.search("cob_202103")
 
     #### DM 보내기 ####
-    insta_bot1.DM("super_moon_1999", "Hey Moons, this is Jerry's msg by Instagram_bot dev_1 version!")
-    time.sleep(999)
-
-    # 1. 
-    is_valid_channel = insta_bot1.activateSpecificChannelDM("super_moon_1999")
-
-
-    if is_valid_channel:
-        insta_bot1.sendDM("Hey Moons, this is Jerry's msg by Instagram_bot dev_1 version!")
-    
-    time.sleep(999)
+    insta_bot1.direct_message("wookdw", "Hey wook, this is Jerry's msg by Instagram_bot dev_1 version!")
+    time.sleep(99999)
 
 
     ## 좋아요 댓글 남기기
     # 1. 특정 포스트로 이동
     post_url = "https://www.instagram.com/p/Ccb0N72pHb7/"
-    insta_bot1.enterPost(post_url)
+    insta_bot1.enter_post(post_url)
 
     # 2. 좋아요 버튼
-    insta_bot1.clickLikeBtn()
+    insta_bot1.click_like_btn()
 
     # 3. 댓글 남기기
     content = "우와 된장술밥 정말 맛있겠네요! 오늘 한번 도전해봐야겠어요!"
     insta_bot1.comment(content)
-
-
-
-    
-
-    time.sleep(9999)
-
-
-
-    ################################################################################################
-    # login_type = ["facebook", "instagram"]
-    login()
-
-    ## DM 보내기
-    send_direct_message(channel_id)
-
-
-
 
     ## 팔로우 - 팔로워 트래킹 (불필요 기능인듯)
     """
@@ -100,202 +87,17 @@ def index(request):
     time.sleep(99999)
     """
 
-    # 특정 게시물에 좋아요 / 댓글 달기 - 
-    # url: "https://www.instagram.com/p/9Xdxr-MF4Z/"
-    """
-    browser.get(specific_url_needs_to_likes_and_coments)
-    time.sleep(3)
-    clickLikeBtn()
-    time.sleep(2)
-    comment()
-    """
-
-    # 인스타 메인화면 - 검색창 - "xx_veens"(채널이름)입력 - 첫 번째 채널 클릭 - 첫 번째 게시글 클릭 - 좋아요, 댓글달기
-    """
-    search(channel_id)
-    clickLikeBtn()
-    comment()
-    """
-
     time.sleep(99999)
     
     return render(request, 'main/index.html')
 
-# 페이스북 로그인
-def login():
-    global browser
-    # browser = wd.Chrome(executable_path=r"../instagram_venv/bin/chromedriver")
-    browser = wd.Chrome(ChromeDriverManager().install())
-    browser.implicitly_wait(2)
-    browser.get(instagram_url)
-    time.sleep(3)
-    is_facebook_btn_click = False
-    is_login_success = False
-
-    try:
-        facebook_login_btn = browser.find_element_by_css_selector(facebook_login_page_css)
-        time.sleep(3)
-        facebook_login_btn.click()
-        is_facebook_btn_click = True
-        is_login_success = True
-
-    except:
-        print("click facebook login button 1 fail")
-        is_facebook_btn_click = False
-        is_login_success = False
-
-    time.sleep(3)
-
-    if not is_facebook_btn_click:
-        print("try click facebook login button 2")
-        try:
-            facebook_login_btn = browser.find_element_by_css_selector(facebook_login_page_css2)
-            time.sleep(3)
-            facebook_login_btn.click()
-            is_facebook_btn_click = True
-            is_login_success = True
-
-        except:
-            print("click facebook login button 2 fail")
-            print("랜딩으로 돌아간다")
-            browser.get(instagram_url)
-                
-    time.sleep(3)
-
-    id_input_form = browser.find_element_by_id(facebook_id_form_id)
-    pw_input_form = browser.find_element_by_id(facebook_pw_form_id)
-
-    id_input_form.send_keys(my_settings.user_id)
-    pw_input_form.send_keys(my_settings.user_passwd)
-
-    time.sleep(3)
-    login_btn = browser.find_element_by_id(facebook_login_btn_css)
-    login_btn.click()
-    time.sleep(10)
-    print("로그인이 정상적으로 완료되었습니다.")
-    
-    try:
-        time.sleep(1)
-        notnow = browser.find_element_by_xpath('/html/body/div[1]/div/div[1]/div/div[2]/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div/div[3]/button[2]')
-        notnow.click()
-        print("접근권한 설정 나중에 하기 완료!")
-
-    except:
-        print("나중에 하기를 찾을 수 없어요!")
-
-        try: 
-            browser.get("https://instagram.com/official_jerry_superman")
-
-        except:
-            print("홈으로도 못가요!")
-
-    # wait = ui.WebDriverWait(browser, 15)
-    # a = wait.until(
-    #     EC.text_to_be_present_in_element((By.CLASS_NAME, "_a9-- _a9_1"), '나중에 하기')
-    # )
-    # a.click()
-    
-    time.sleep(2)
-
+def testMulti():
+    insta_bot = 1
     return
 
-def search(channel_id):
-    try:
-        search_input_form = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/nav/div[2]/div/div/div[2]/input")
-    # search_input_form.focus()
-        time.sleep(1)
-        search_input_form.send_keys(channel_id)
-        time.sleep(4)
-        first_search_target_channel = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/nav/div[2]/div/div/div[2]/div[3]/div/div[2]/div/div[1]/a")
-        first_search_target_channel.click()
-        time.sleep(2)
-        print("정상적으로 검색이 완료되었어요!")
-    except:
-        print("검색 실패로 인해 홈화면으로 갑니다.")
-        browser.get("https://instagram.com")
-        return
-
-
-    # try:
-    #     first_post_element = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/main/div/div[3]/article/div/div/div[1]/div[1]/a")
-    #     # second_post_element = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/main/div/div[3]/article/div/div/div[1]/div[2]/a")
-    #     # first_post_element = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/main/div/div[3]/article/div/div/div[1]/div[3]/a")
-
-    #     # first_post_element = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/main/div/div[3]/article/div/div/div[2]/div[1]/a")
-    #     # first_post_element = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/main/div/div[3]/article/div/div/div[2]/div[2]/a")
-    #     # first_post_element = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/main/div/div[3]/article/div/div/div[2]/div[3]/a")
-
-    #     # first_post_element = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/main/div/div[3]/article/div/div/div[2]/div[1]/a")
-    #     # first_post_element = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/main/div/div[3]/article/div/div/div[2]/div[1]/a")
-    #     # first_post_element = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/main/div/div[3]/article/div/div/div[2]/div[1]/a")
-
-    #     # adksljfaklsdfjdkla = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/main/div/div[3]/article/div/div/div[11]/div[2]/a")
-
-    #     # first_post_element = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[1]/div/div/div[1]/div[1]/section/main/div/div[3]/article/div/div/div[12]/div[2]/a")
-    #     time.sleep(2)
-    #     first_post_element.click()
-    #     time.sleep(2)
-    #     print("정상적으로 n번째 포스트에 들어왔어요!")
-    # except:
-    #     print("n번째 포스트 입장에 실패로 인해 홈화면으로 갑니다.")
-    #     browser.get("https://instagram.com")
-
-    return
-
-
-# 좋아요!
-def clickLikeBtn():
-    try:
-        like_btn = browser.find_element_by_xpath("//span[@class='_aamw']/button")
-        # like_btn = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[2]/div/div/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/section[1]/span[1]/button")
-        time.sleep(2)
-        like_btn.click()
-        print("좋아요 버튼이 정상적으로 눌렸어요!")
-
-    except:
-        print("n번째 포스트 입장에 실패로 인해 홈화면으로 갑니다.")
-        browser.get("https://instagram.com")
-
-    return
-
-# 댓글 달기!
-def comment():
-    try:
-        activate_comment_btn = browser.find_element_by_xpath("//span[@class='_aamx']/button")
-        # activate_comment_btn = browser.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[2]/div/div/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/section[1]/span[2]/button")
-        activate_comment_btn.click()
-        print("정상적으로 댓글창을 불러왔어요!")
-
-    except:
-        print("댓글창을 불러올 수 없거나 이미 활성화 되어있을지도?!")
-    time.sleep(3)
-
-    try:
-        # textarea (댓글 입력공간) 특정하기
-        comment_area = browser.find_element_by_xpath('//form[@class="_aao9"]/textarea')
-        # comment_area = browser.find_element_by_xpath('/html/body/div[1]/div/div[1]/div/div[2]/div/div/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/section[3]/div/form/textarea')
-        comment_area.click()
-        time.sleep(3)
-
-        # textarea에 댓글 입력
-        comment_area.send_keys("잘 보고 가요~")
-        time.sleep(3)
-
-        # 댓글 추가 버튼 특정하기
-        comment_add_btn = browser.find_element_by_xpath("//form[@class='_aao9']/button")
-        # comment_add_btn = browser.find_element_by_xpath('/html/body/div[1]/div/div[1]/div/div[2]/div/div/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/section[3]/div/form/button')
-        comment_add_btn.click()
-        time.sleep(3)
-        print("정상적으로 댓글이 남겨졌어요!")
-
-    except:
-        print("댓글남기기에 실패하여 메인으로 갑니다.")
-        browser.get("https://instagram.com")
-
-    return
 
 def trackUnfollower(channel_url):
-
+    browser = wd.Chrome(ChromeDriverManager().install())
     # 1. 해당채널로 이동
     try:
         browser.get(channel_url)
@@ -476,37 +278,3 @@ def trackUnfollower(channel_url):
     return 
 
     # //div[contains(text(),'팔로워 ')]/..
-
-def send_direct_message(channel_id):
-
-    ## 1. 특정채널 검색해서 들어가기
-    search(channel_id)
-    
-    ## 2. 메세지 보내기 버튼 클릭
-    try:
-        send_message_button_element = ui.WebDriverWait(browser, 2).until(EC.element_to_be_clickable((By.XPATH, "//div[contains(text(),'메시지 보내기')]/..")))
-        send_message_button_element.click()
-        print("메시지 보내기 버튼 클릭에 성공했어요!")
-
-    except:
-        print("메시지 보내기 버튼 클릭에 실패했어요!")
-        print("랜딩 페이지로 돌아갑니다.")
-        browser.get(instagram_url)
-        return
-
-    ## 3. DM창 도착
-    try:
-        textarea_element = ui.WebDriverWait(browser, 2).until(EC.element_to_be_clickable((By.XPATH, "//textarea[contains(@placeholder,'메시지 입력...')]")))
-        textarea_element.click()
-        textarea_element.send_keys("Hi, This is Featuring Instagram Crawler, how are you doing? Is everything fine?, I hope this crawler works well!")
-        textarea_element.send_keys(Keys.ENTER)
-        print("DM을 성공적으로 전송했습니다.")
-
-    except:
-        print("DM 메시지 창에 도착했으나 DM보내기에 실패했어요!")
-        print("랜딩 페이지로 돌아갑니다.")
-        browser.get(instagram_url)        
-        return
-
-    time.sleep(999)
-    return
