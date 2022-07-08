@@ -18,7 +18,8 @@ import re
 import json
 import pandas as pd
 
-import multiprocessing
+# import multiprocessing
+from main.models import DirectMessage
 
 facebook_login_page_css = ".sqdOP.yWX7d.y3zKF     "
 facebook_login_page_css2 = ".sqdOP.L3NKy.y3zKF     "
@@ -57,7 +58,8 @@ def index(request):
     #     thread.setPermisson()
     #     thread.DM("super_moon_1999", "THREADING ADOPTED: This is Jerry's msg for testing Insagram_bot dev version2")
     # time.sleep(99999)
-
+    print(DirectMessage.objects.filter()[0].message)
+    time.sleep(99999)
     insta_bot1 = InstagramBot(my_settings.user_id, my_settings.user_passwd)
     insta_bot1.log_in()
     insta_bot1.set_permisson()
@@ -161,7 +163,6 @@ def trackUnfollower(channel_url):
     # scroll_box = browser.find_element_by_xpath("//div[@class='qg4pu3sx flebnqrf kzt5xp73 h98he7qt e793r6ar pi61vmqs od1n8kyl h6an9nv3 j4yusqav']")
     # followers_elements = browser.find_elements_by_class_name("_aacl _aaco _aacw _aacx _aad7 _aade")
 
-    i = 0
     pop_up_window = ui.WebDriverWait(browser, 2).until(EC.element_to_be_clickable((By.XPATH, "//div[@class='_aano']")))
 
     for i in range(int(follower_number/4)):

@@ -47,3 +47,20 @@ class ChannelPost(CommonInfo):
 
     def __str__(self):
         return self.target_channel.InstagramChannel.channel_id + "인스타 채널의" + self.post_id + "포스트 내용"
+
+
+class DirectMessage(CommonInfo):
+    target_channel_id = models.CharField(max_length=50)
+    message = models.TextField()
+
+    def __str__(self):
+        return self.target_channel_id + "에게" + (self.message + "메시지를 보내야합니다." if len(self.message) < 100 else " 홍보 메시지를 보냅니다.")
+
+class DMChecker(CommonInfo):
+    channel_id = models.CharField(max_length=50, unique=True)
+    is_dm_sent = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False)
+    is_comment_needed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.channel_id + ": DM 홍보를 진행" + ("한 채널입니다" if self.is_dm_sent else "하지 않은 채널입니다.")
